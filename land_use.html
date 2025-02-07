@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leaflet Colored Land Areas</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+      /* Add this CSS for better styling */
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+      #map { 
+        width: calc(100% - 300px); /* Adjust for panel width */
+        height: 100%;
+        float: right;
+      }
+    
+      #sidePanel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 300px; /* Fixed width for the side panel */
+        height: 100%;
+        background-color: #f4f4f4;
+        box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+      }
+    
+      #sidePanel a {
+        padding: 10px 15px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #333;
+        border-bottom: 1px solid #FFBE29;
+        transition: 0.3s;
+        width: 100%; /* Ensure the links take up the full width */
+        box-sizing: border-box; /* Include padding and borders in width calculation */
+      }
+    
+      #sidePanel a:hover {
+        background-color: #FFBE29;
+        color: #000;
+      }
+    
+      /* Button styling */
+      #sidePanel .button-container {
+        text-align: center;
+        padding: 15px;
+        border-top: 1px solid #FFBE29;
+        margin-top: auto; /* Ensure button stays at the bottom */
+      }
+    
+      #sidePanel button {
+        padding: 10px 15px;
+        font-size: 16px;
+        color: white;
+        background-color: #EB7400;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%; /* Make the button fill the panel width */
+        bottom: 10px;
+      }
+    
+      #sidePanel button:hover {
+        background-color: #EB7400;
+      }
+    
+      .leaflet-control{
+        background-color: #EB7400;
+        opacity: 0.7;
+      }
+
+
+      .button-container {
+		margin-top: auto;
+		padding: 15px;
+		border-top: 1px solid #FFBE29;
+	}
+
+	.download-btn, .contact-btn {
+		background-color: #EB7400;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: 0.3s;
+		width: 100%;
+	}
+    
+      </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <!-- Side Panel -->
+  <div id="sidePanel">
+    <!-- <h3>Title</h3> -->
+    <a style="background-color: #EB7400;">Sri Lankan Portal</a>
+    <a href="colombo-road.html">Colombo Roads</a>
+    <a href="colombo-railway.html">Colombo Railways</a>
+    <a href="night-data.html">Colombo Night Data</a>
+    <a href="flood-inundation-wester.html">Colombo Flood Data</a>
+    <a href="land_use.html">Colombo Land Use</a>
+    <a href="lulc.html">Colombo Land Cover</a>
+    <!-- Download Button -->
+    <div class="button-container">
+      <button class="download-btn" onclick="downloadColombo()">Download Colombo Roads</button>
+      
+      <button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='adddata.html';">Add Data</button>
+      <button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='contactus.html';">Contact Us</button>
+    </div>	
+  </div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/topojson@3"></script>
+<script type="text/javascript" src="databases/Landuse.js"></script>
+<script>
+    // Initialize the map
+  // Initialize Leaflet map
+  var map = L.map('map').setView([6.9271, 79.8612], 10);// Set the center and zoom level
+
+// Add OpenStreetMap base layer
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 18,
+}).addTo(map);
+
+// Example TopoJSON data (your 'lands' variable)
+
+// Convert TopoJSON to GeoJSON
+var geojson = topojson.feature(lands, lands.objects.LU_New);
+
+// Add GeoJSON to the map
+L.geoJSON(geojson, {
+  style: {
+    color: 'orange',
+    weight: 2,
+    fillOpacity: 0.4
+  },
+  onEachFeature: function (feature, layer) {
+    if (feature.properties && feature.properties.name) {
+      layer.bindPopup("Land Area: " + feature.properties.name);
+    }
+  }
+}).addTo(map);
+
+function downloadColombo() {
+		const link = document.createElement('a');
+		link.href = 'databases/Landuse.js'; // Path to the JSON file
+		link.download = 'Landuse.json'; // File name for download
+		link.click();
+}
+
+</script>
+
+</body>
+</html>
