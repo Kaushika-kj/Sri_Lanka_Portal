@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <style>
+      /* Add this CSS for better styling */
+      html, body {
+        height: 100%;
+        margin: 0;
+      }
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+      #map { 
+        width: calc(100% - 300px); /* Adjust for panel width */
+        height: 100%;
+        float: right;
+      }
+    
+      #sidePanel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 300px; /* Fixed width for the side panel */
+        height: 100%;
+        background-color: #f4f4f4;
+        box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+      }
+    
+      #sidePanel a {
+        padding: 10px 15px;
+        text-decoration: none;
+        font-size: 18px;
+        color: #333;
+        border-bottom: 1px solid #FFBE29;
+        transition: 0.3s;
+        width: 100%; /* Ensure the links take up the full width */
+        box-sizing: border-box; /* Include padding and borders in width calculation */
+      }
+    
+      #sidePanel a:hover {
+        background-color: #FFBE29;
+        color: #000;
+      }
+    
+      /* Button styling */
+      #sidePanel .button-container {
+        text-align: center;
+        padding: 15px;
+        border-top: 1px solid #FFBE29;
+        margin-top: auto; /* Ensure button stays at the bottom */
+      }
+    
+      #sidePanel button {
+        padding: 10px 15px;
+        font-size: 16px;
+        color: white;
+        background-color: #EB7400;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s;
+        width: 100%; /* Make the button fill the panel width */
+        bottom: 10px;
+      }
+    
+      #sidePanel button:hover {
+        background-color: #EB7400;
+      }
+    
+      .leaflet-control{
+        background-color: #EB7400;
+        opacity: 0.7;
+      }
+
+      .button-container {
+		margin-top: auto;
+		padding: 15px;
+		border-top: 1px solid #FFBE29;
+	}
+
+	.download-btn, .contact-btn {
+		background-color: #EB7400;
+		color: white;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: 0.3s;
+		width: 100%;
+	}
+    
+      </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="sidePanel">
+      <!-- <h3>Title</h3> -->
+      <a style="background-color: #EB7400;">Sri Lankan Portal</a>
+      <a href="colombo-road.html">Colombo Roads</a>
+      <a href="colombo-railway.html">Colombo Railways</a>
+      <a href="night-data.html">Colombo Night Data</a>
+      <a href="flood-inundation-wester.html">Colombo Flood Data</a>
+      <a href="land_use.html">Colombo Land Use</a>
+      <a href="lulc.html">Colombo Land Cover</a>
+      <!-- Download Button -->
+      <div class="button-container">
+        <button class="download-btn" onclick="downloadColombo()">Download Colombo Roads</button>
+        
+        <button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='adddata.html';">Add Data</button>
+        <button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='contactus.html';">Contact Us</button>
+      </div>	
+    </div>
+    <div id="overlay">
+      <h1>Loading GeoTIFF File...</h1>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/georaster"></script>
+    <script src="https://unpkg.com/proj4"></script>
+    <script src="https://unpkg.com/georaster-layer-for-leaflet"></script>
+    <script>
+      var map = L.map('map').setView([0, 0], 5);
+
+      L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+
+
+
+      
+      function loadGeoTIFF(filePath) {
+        fetch(filePath, { mode: 'no-cors' })
+          .then(response => response.arrayBuffer())
+          .then(arrayBuffer => parseGeoraster(arrayBuffer))
+          .then(georaster => {
+            var layer = new GeoRasterLayer({
+                georaster: georaster,
+                opacity: 0.7,
+                resolution: 256,
+                // Color Mapping Based on Pixel Values
+                pixelValuesToColorFn: function(pixelValues) {
+                var value = pixelValues[0]; // Assuming single-band TIFF
+                
+                if (value === 0) return 'transparent';     // No Data
+                if (value < 1) return '#641e16';             // Low Values
+                if (value < 2) return '#641e16';  
+                if (value < 3) return '#e67e22';      
+                if (value < 4) return '#f5b041';      
+                if (value < 5) return '#f7dc6f';      
+                if (value < 7) return '#f7dc6f';               // Medium Values
+                if (value < 150) return 'transparent';          // High Values
+                return 'red';                              // Very High Values
+                }
+            });
+            
+            layer.addTo(map);
+            map.fitBounds(layer.getBounds());
+          })
+          .catch(error => console.error("Error loading GeoTIFF:", error));
+      }
+
+      // Specify the path to your GeoTIFF file
+      var geoTiffPath = 'databases/LULC.tif';
+      loadGeoTIFF(geoTiffPath);
+
+function downloadColombo() {
+		const link = document.createElement('a');
+		link.href = 'databases/LULC.tif'; // Path to the JSON file
+		link.download = 'LULC.tif'; // File name for download
+		link.click();
+}
+    </script>
+  </body>
+</html>
