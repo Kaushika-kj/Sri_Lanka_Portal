@@ -179,8 +179,20 @@
 	// }
 
 	/* global statesData */
-	const geojson = L.geoJson(poi, {
-		style
+	// const geojson = L.geoJson(poi, {
+	// 	style
+	// }).addTo(map);
+	L.geoJson(poi, {
+	pointToLayer: function (feature, latlng) {
+		return L.circleMarker(latlng, {
+			radius: 8,            // size of the circle
+			fillColor: "#ff7800",
+			color: "#000",
+			weight: 1,
+			opacity: 1,
+			fillOpacity: 0.8
+		});
+	}
 	}).addTo(map);
 
 	// function resetHighlight(e) {
@@ -200,7 +212,7 @@
 	// 	});
 	// }
 
-	map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
+	// map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
 
 	const legend = L.control({position: 'bottomright'});
 
