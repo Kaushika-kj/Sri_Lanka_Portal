@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<base target="_top">
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>Choropleth Tutorial - Leaflet</title>
+
+    <link rel="stylesheet" href="leaflet.css" />
+	<script src="leaflet.js"></script>
+
+	<style>
+	/* Add this CSS for better styling */
+	html, body {
+		height: 100%;
+		margin: 0;
+	}
+	.leaflet-container {
+		height: 100%;
+		width: 100%;
+	}
+	#map { 
+		width: calc(100% - 300px); /* Adjust for panel width */
+		height: 100%;
+		float: right;
+	}
+
+	#sidePanel {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 300px; /* Fixed width for the side panel */
+		height: 100%;
+		background-color: #f4f4f4;
+		box-shadow: 2px 0px 5px rgba(0, 0, 0, 0.5);
+		display: flex;
+		flex-direction: column;
+	}
+
+	#sidePanel a {
+		padding: 10px 15px;
+		text-decoration: none;
+		font-size: 18px;
+		color: #333;
+		border-bottom: 1px solid #ddd;
+		transition: 0.3s;
+		width: 100%; /* Ensure the links take up the full width */
+		box-sizing: border-box; /* Include padding and borders in width calculation */
+	}
+
+	#sidePanel a:hover {
+		background-color: #ddd;
+		color: #000;
+	}
+
+	/* Button styling */
+	#sidePanel .button-container {
+		text-align: center;
+		padding: 15px;
+		border-top: 1px solid #ddd;
+		margin-top: auto; /* Ensure button stays at the bottom */
+	}
+
+	#sidePanel button {
+		padding: 10px 15px;
+		font-size: 16px;
+		color: white;
+		background-color: #a73636;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: 0.3s;
+		width: 100%; /* Make the button fill the panel width */
+		bottom: 10px;
+	}
+
+	#sidePanel button:hover {
+		background-color: #d04545;
+	}
+
+	.leaflet-control{
+		background-color: #d04545;
+		opacity: 0.7;
+	}
+
+	</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<!-- Side Panel -->
+<div id="sidePanel">
+	<!-- <h3>Title</h3> -->
+	<a style="background-color: #EB7400;">Sri Lankan Portal</a>
+	<a href="colombo-road.html">Colombo Roads</a>
+	<a href="colombo-railway.html">Colombo Railways</a>
+	<a href="night-data.html">Colombo Night Data</a>
+	<a href="flood-inundation-wester.html">Colombo Flood Data</a>
+	<a href="land_use.html">Colombo Land Use</a>
+	<a href="lulc.html">Colombo Land Cover</a>
+	<!-- Download Button -->
+	<div class="button-container">
+		<button class="download-btn" onclick="downloadColombo()">Download Colombo Roads</button>
+		
+		<button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='adddata.html';">Add Data</button>
+		<button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='contactus.html';">Contact Us</button>
+	</div>
+</div>
+<!-- Button to open the side panel -->
+<!-- <button class="openbtn" onclick="openSidePanel()">&#9776; Open Panel</button> -->
+
+<script type="text/javascript" src="geoJson/colombo.js"></script>
+
+<script type="text/javascript">
+	const map = L.map('map').setView([6.8271, 79.999], 12);
+
+	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 19,
+		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	}).addTo(map);
+
+	// control that shows state info on hover
+	const info = L.control();
+
+	info.onAdd = function (map) {
+		this._div = L.DomUtil.create('div', 'info');
+		this.update();
+		return this._div;
+	};
+
+	info.update = function (props) {
+		const contents = props ? `<b>${props.DSD_N}</b><br />${props.density} people / mi<sup>2</sup>` : 'Hover over a state';
+		this._div.innerHTML = `<h4>Colimbo Population Density</h4>${contents}`;
+	};
+
+	info.addTo(map);
+
+	// get color depending on population density value
+	function getColor(d) {
+		return d > 1000 ? '#800026' :
+			d > 500  ? '#BD0026' :
+			d > 200  ? '#E31A1C' :
+			d > 100  ? '#FC4E2A' :
+			d > 50   ? '#FD8D3C' :
+			d > 20   ? '#FEB24C' :
+			d > 10   ? '#FED976' : '#FFEDA0';
+	}
+
+	function style(feature) {
+		return {
+			weight: 2,
+			opacity: 1,
+			color: 'white',
+			dashArray: '3',
+			fillOpacity: 0.7,
+			fillColor: getColor(feature.properties.density)
+		};
+	}
+
+	function highlightFeature(e) {
+		const layer = e.target;
+
+		layer.setStyle({
+			weight: 5,
+			color: '#666',
+			dashArray: '',
+			fillOpacity: 0.7
+		});
+
+		layer.bringToFront();
+
+		info.update(layer.feature.properties);
+	}
+
+	/* global statesData */
+	const geojson = L.geoJson(statesData, {
+		style,
+		onEachFeature
+	}).addTo(map);
+
+	function resetHighlight(e) {
+		geojson.resetStyle(e.target);
+		info.update();
+	}
+
+	function zoomToFeature(e) {
+		map.fitBounds(e.target.getBounds());
+	}
+
+	function onEachFeature(feature, layer) {
+		layer.on({
+			mouseover: highlightFeature,
+			mouseout: resetHighlight,
+			click: zoomToFeature
+		});
+	}
+
+	map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
+
+	const legend = L.control({position: 'bottomright'});
+
+	legend.onAdd = function (map) {
+		const div = L.DomUtil.create('div', 'info legend');
+		const grades = [0, 10, 20, 50, 100, 200, 500, 1000];
+		const labels = [];
+		let from, to;
+
+		for (let i = 0; i < grades.length; i++) {
+			from = grades[i];
+			to = grades[i + 1];
+
+			labels.push(`<i style="background:${getColor(from + 1)}"></i> ${from}${to ? `&ndash;${to}` : '+'}`);
+		}
+
+		div.innerHTML = labels.join('<br>');
+		return div;
+	};
+
+	legend.addTo(map);
+
+	// // Side Panel functions
+	// function openSidePanel() {
+	// 	document.getElementById('sidePanel').style.right = '0'; /* Show the panel */
+	// }
+
+	// function closeSidePanel() {
+	// 	document.getElementById('sidePanel').style.right = '-300px'; /* Hide the panel */
+	// }
+	// Function to download the Colombo JSON file
+	function downloadColombo() {
+		const link = document.createElement('a');
+		link.href = 'geoJson/colombo.json'; // Path to the JSON file
+		link.download = 'colombo.json'; // File name for download
+		link.click();
+	}
+</script>
+
+</body>
+</html>
