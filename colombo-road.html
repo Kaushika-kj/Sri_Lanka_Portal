@@ -111,23 +111,15 @@
 <div id="map"></div>
 
 <!-- Side Panel -->
-<div id="sidePanel">
-	<!-- <h3>Title</h3> -->
-	<a style="background-color: #EB7400;">Sri Lankan Portal</a>
-	<a href="colombo-road.html">Colombo Roads</a>
-	<a href="colombo-railway.html">Colombo Railways</a>
-	<a href="night-data.html">Colombo Night Data</a>
-	<a href="flood-inundation-wester.html">Colombo Flood Data</a>
-	<a href="land_use.html">Colombo Land Use</a>
-	<a href="lulc.html">Colombo Land Cover</a>
-	<!-- Download Button -->
-	<div class="button-container">
-		<button class="download-btn" onclick="downloadColombo()">Download Colombo Roads</button>
-		
-		<button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='adddata.html';">Add Data</button>
-		<button class="download-btn" style="margin-top: 10px;" onclick="window.location.href='contactus.html';">Contact Us</button>
-	</div>
-</div>
+<div id="side-panel"></div>
+
+<script>
+  fetch('side-panel.html')
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById('side-panel').innerHTML = data;
+    });
+</script>
 
 <!-- Button to open the side panel -->
 <!-- <button class="openbtn" onclick="openSidePanel()">&#9776; Open Panel</button> -->
