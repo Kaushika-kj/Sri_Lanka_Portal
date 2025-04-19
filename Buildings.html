@@ -163,43 +163,42 @@
 		};
 	}
 
-	function highlightFeature(e) {
-		const layer = e.target;
+	// function highlightFeature(e) {
+	// 	const layer = e.target;
 
-		layer.setStyle({
-			weight: 5,
-			color: '#666',
-			dashArray: '',
-			fillOpacity: 0.7
-		});
+	// 	layer.setStyle({
+	// 		weight: 5,
+	// 		color: '#666',
+	// 		dashArray: '',
+	// 		fillOpacity: 0.7
+	// 	});
 
-		layer.bringToFront();
+	// 	layer.bringToFront();
 
-		info.update(layer.feature.properties);
-	}
+	// 	info.update(layer.feature.properties);
+	// }
 
 	/* global statesData */
 	const geojson = L.geoJson(Buildings, {
-		style,
-		onEachFeature
+		style
 	}).addTo(map);
 
-	function resetHighlight(e) {
-		geojson.resetStyle(e.target);
-		info.update();
-	}
+	// function resetHighlight(e) {
+	// 	geojson.resetStyle(e.target);
+	// 	info.update();
+	// }
 
-	function zoomToFeature(e) {
-		map.fitBounds(e.target.getBounds());
-	}
+	// function zoomToFeature(e) {
+	// 	map.fitBounds(e.target.getBounds());
+	// }
 
-	function onEachFeature(feature, layer) {
-		layer.on({
-			mouseover: highlightFeature,
-			mouseout: resetHighlight,
-			click: zoomToFeature
-		});
-	}
+	// function onEachFeature(feature, layer) {
+	// 	layer.on({
+	// 		mouseover: highlightFeature,
+	// 		mouseout: resetHighlight,
+	// 		click: zoomToFeature
+	// 	});
+	// }
 
 	map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
 
